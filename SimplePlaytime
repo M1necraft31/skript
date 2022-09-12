@@ -1,0 +1,21 @@
+variables:
+	{second::%player%} = 0
+	{minute::%player%} = 0
+	{hour::%player%} = 0
+
+every second:
+	loop all players:
+		add 1 to {second::%loop-player%}
+		if {second::%loop-player%} is 60:
+			subtract 60 from {second::%loop-player%}
+			add 1 to {minute::%loop-player%}
+		if {minute::%loop-player%} is 60:
+			subtract 60 from {minute::%loop-player%}
+			add 1 to {hour::%loop-player%}
+
+
+command /playtime:
+    trigger:
+        send ""
+        send "§x§2§7§d§f§f§f§l§oP§x§2§4§d§0§e§e§l§oL§x§2§2§c§2§d§d§l§oA§x§1§f§b§3§c§c§l§oY§x§1§d§a§4§b§c§l§oT§x§1§a§9§5§a§b§l§oI§x§1§8§8§7§9§a§l§oM§x§1§5§7§8§8§9§l§oE &f>> &f&l%player%&f: %{hour::%player%}% Hours %{minute::%player%}% Minutes %{second::%player%}% Seconds"
+        send ""
