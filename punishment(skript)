@@ -1,0 +1,389 @@
+options:
+ banPermission: ban.use
+ tempbanPermission: tempban.use
+ kickPermission: kick.use
+ ipbanPermission: ipban.use
+ mutePermission: mute.use
+ historyPermission: history.use
+ warnPermission: warn.use
+
+ permissionMessage: &cPermission denied
+ 
+#BAN
+command /ban [<offlineplayer>] [<text>]:
+ permission: {@banPermission}
+ permission message: {@permissionMessage}
+ aliases: blacklist
+ trigger:
+  if arg-1 is not set:
+   send "&c/ban (player) (reason) (-silent/-s)"
+   send "&7Example: &c/ban M1necraft31 Abusive"
+   stop
+  if arg-1 has permission "{@banPermission}":
+   send "&cYou can't do that to that player!"
+   stop
+  if arg-1 is banned:
+   send "&cThat player is already banned!"
+   stop
+  if arg-2 is not set:
+   set {_r} to "N/A"
+  else:
+   set {_r} to arg-2
+
+  if {_r} contains "-s" or "-silent":
+   replace all " -s" or " -silent" with "" in {_r}
+   set {_silent} to true
+
+  if player is not set:
+   set {_p} to "CONSOLE"
+  else:
+   set {_p} to player
+    
+  ban arg-1 due to {_r}
+  kick arg-1 due to "&7You have been permanently banned from the server by &3%{_p}% &7due to &c%{_r}%"
+  add "&3%{_p}% &7banned &3%arg-1% &7for &c%{_r}% &7[FOREVER]" to {history.%arg-1's uuid%::*}
+  if {_silent} is set:
+   loop all players:
+    loop-player has permission "{@banPermission}"
+    send "&8&o(SILENT) &3%{_p}% &7banned &3%arg-1% &7for &c%{_r}% &7[FOREVER]" to loop-player
+   stop
+  send "&3%{_p}% &7banned &3%arg-1% &7for &c%{_r}% &7[FOREVER]" to all players
+  stop
+
+#TEMPBAN
+command /tempban [<offlineplayer>] [<text>] [<timespan>]:
+ permission: {@tempbanPermission}
+ permission message: {@permissionMessage}
+ aliases: tempkick
+ trigger:
+  if arg-1 is not set:
+   send "&c/tempban (player) (reason) (-silent/-s) (length)"
+   send "&7Example: &c/tempban M1necraft31 Blatantly Hacking 7 days"
+   stop
+  if arg-1 has permission "{@tempbanPermission}":
+   send "&cYou can't do that to that player!"
+   stop
+  if arg-1 is banned:
+   send "&cThat player is already banned!"
+   stop
+  if arg-2 is not set:
+   set {_r} to "N/A"
+  else:
+   set {_r} to arg-2
+
+  if {_r} contains "-s" or "-silent":
+   replace all " -s" or " -silent" with "" in {_r}
+   set {_silent} to true
+
+  if player is not set:
+   set {_p} to "CONSOLE"
+  else:
+   set {_p} to player
+
+  if arg-3 is not set:
+   set {_l} to 30 DAYS
+  else:
+   set {_l} to capitalized "%arg-3%"
+
+  ban arg-1 due to {_r} for {_l} parsed as timespan
+  kick arg-1 due to "&7You have been temporarily been banned from the server by &3%{_p}% &7due to &8&o(&c&o%{_r}%&8&o) &7[%{_l}%&7]"
+  add "&3%{_p}% &7banned &3%arg-1% &7for &c%{_r}% &7[%{_l}%]" to {history.%arg-1's uuid%::*}
+  if {_silent} is set:
+   loop all players:
+    loop-player has permission "{@banPermission}"
+    send "&8&o(SILENT) &3%{_p}% &7banned &3%arg-1% &7for &c%{_r}% &7[%{_l}%&7]" to loop-player
+   stop
+  send "&3%{_p}% &7banned &3%arg-1% &7for &c%{_r}% &7[%{_l}%&7]" to all players
+  stop
+
+
+#KICK
+command /kick [<offlineplayer>] [<text>]:
+ permission: {@kickPermission}
+ permission message: {@permissionMessage}
+ trigger:
+  if arg-1 is not set:
+   send "&c/kick (player) (reason) (-silent/-s)"
+   send "&7Example: &c/kick M1necraft31 bad"
+   stop
+  if arg-1 has permission "{@kickPermission}":
+   send "&cYou can't do that to that player!"
+   stop
+  if arg-2 is not set:
+   set {_r} to "N/A"
+  else:
+   set {_r} to arg-2
+
+  if {_r} contains "-s" or "-silent":
+   replace all " -s" or " -silent" with "" in {_r}
+   set {_silent} to true
+
+  if player is not set:
+   set {_p} to "CONSOLE"
+  else:
+   set {_p} to player
+    
+  kick arg-1 due to "&7You have been kicked from the server by &3%{_p}% &7due to &c%{_r}%"
+  add "&3%{_p}% &7kicked &3%arg-1% &7for &c%{_r}%" to {history.%arg-1's uuid%::*}
+  if {_silent} is set:
+   loop all players:
+    loop-player has permission "{@kickPermission}"
+    send "&8&o(SILENT) &3%{_p}% &7kicked &3%arg-1% &7for &c%{_r}%" to loop-player
+   stop
+  send "&3%{_p}% &7kicked &3%arg-1% &7for &c%{_r}%" to all players
+  stop
+
+#UNBAN
+command /unban [<offlineplayer>] [<text>]:
+ permission: {@tempbanPermission}
+ permission message: {@permissionMessage}
+ trigger:
+  if arg-1 is not set:
+   send "&c/unban (player) (-silent/-s)"
+   send "&7Example: &c/unban M1necraft31"
+   stop
+  if arg-1 has permission "{@tempbanPermission}":
+   send "&cYou can't do that to that player!"
+   stop
+  if arg-1 is not banned:
+   send "&cThat player is not banned!"
+   stop
+  if player is not set:
+   set {_p} to "CONSOLE"
+  else:
+   set {_p} to player
+  unban arg-1
+  add "&3%{_p}% &7unbanned &3%arg-1%" to {history.%arg-1's uuid%::*}
+  if arg-2 contains "-s" or "-silent":
+   loop all players:
+    loop-player has permission "{@mutePermission}"
+    send "&8&o(SILENT) &3%{_p}% &7unbanned &3%arg-1%" to loop-player
+   stop
+  send "&3%{_p}% &7unbanned &3%arg-1%" to all players
+  stop 
+
+
+
+#WARN
+command /warn [<offlineplayer>] [<text>]:
+ permission: {@warnPermission}
+ permission message: {@permissionMessage}
+ trigger:
+  if arg-1 is not set:
+   send "&c/warn (player)"
+   send "&7Example: &c/warn M1necraft31"
+   stop
+  if arg-1 has permission "{@warnPermission}":
+   send "&cYou can't do that to that player!"
+   stop
+  if arg-2 is set:
+   if arg-2 is not "Spamming" or "Caps" or "Staff Disrespecting" or "Swearing":
+    send "&cInvalid reason!"
+    make player execute "warn %arg-1%"
+    stop
+   add 1 to {warn.%arg-1's uuid%.%arg-2%}
+   send "&3%player% &7warned &3%arg-1% &7for &c%arg-2% &7(%{warn.%arg-1's uuid%.%arg-2%}%&7/3)" to all players
+   if {warn.%arg-1's uuid%.%arg-2%} > 2:
+    send "&7That player has recieved multiple warns for &c%arg-2% &7they deserve a punishment" 
+    clear {warn.%arg-1's uuid%.%arg-2%}
+   stop
+  open virtual chest inventory with size 3 named "&7Warn &c%arg-1%" to player
+  set {_} to 0
+  set {warn.%player%} to arg-1
+  loop 27 times:
+   format gui slot {_} of player with black stained glass pane named "&7"
+   add 1 to {_}
+  format gui slot 10 of player with red stained glass pane named "&3Spamming" with lore "&7(%{warn.%arg-1's uuid%.Spamming} ? 0%&7/3)" to run:
+   make player execute "warn %{warn.%player%}% Spamming"
+  format gui slot 12 of player with red stained glass pane named "&3Caps" with lore "&7(%{warn.%arg-1's uuid%.Caps} ? 0%&7/3)" to run:
+   make player execute "warn %{warn.%player%}% Caps"
+  format gui slot 14 of player with red stained glass pane named "&3Staff Disrespecting" with lore "&7(%{warn.%arg-1's uuid%.Staff Disrespecting} ? 0%&7/3)" to run:
+   make player execute "warn %{warn.%player%}% Staff Disrespecting"
+  format gui slot 16 of player with red stained glass pane named "&3Swearing" with lore "&7(%{warn.%arg-1's uuid%.Swearing} ? 0%&7/3)" to run:
+   make player execute "warn %{warn.%player%}% Swearing"
+
+#UNWARN
+command /unwarn [<offlineplayer>] [<text>]:
+ permission: {@warnPermission}
+ permission message: {@permissionMessage}
+ trigger:
+  if arg-1 is not set:
+   send "&c/unwarn (player)"
+   send "&7Example: &c/unwarn M1necraft31"
+   stop
+  if arg-1 has permission "{@warnPermission}":
+   send "&cYou can't do that to that player!"
+   stop
+  if arg-2 is set:
+   if arg-2 is not "Spamming" or "Caps" or "Staff Disrespecting" or "Swearing":
+    send "&cInvalid warn!"
+    make player execute "warn %arg-1%"
+    stop
+   if {warn.%arg-1's uuid%.%arg-2%} = 0:
+    clear {warn.%arg-1's uuid%.%arg-2%}
+   if {warn.%arg-1's uuid%.%arg-2%} is not set:
+    send "&cThat player was never warned for &7%arg-2%"
+    stop
+   remove 1 from {warn.%arg-1's uuid%.%arg-2%}
+   send "&3%player% &7unwarned &3%arg-1% &7for &c%arg-2% &7(%{warn.%arg-1's uuid%.%arg-2%}%&7/3)" to all players
+   stop
+  open virtual chest inventory with size 3 named "&7unWarn &c%arg-1%" to player
+  set {_} to 0
+  set {warn.%player%} to arg-1
+  loop 27 times:
+   format gui slot {_} of player with black stained glass pane named "&7"
+   add 1 to {_}
+  format gui slot 10 of player with red stained glass pane named "&3Spamming" with lore "&7(%{warn.%arg-1's uuid%.Spamming} ? 0%&7/3)" to run:
+   make player execute "unwarn %{warn.%player%}% Spamming"
+  format gui slot 12 of player with red stained glass pane named "&3Caps" with lore "&7(%{warn.%arg-1's uuid%.Caps} ? 0%&7/3)" to run:
+   make player execute "unwarn %{warn.%player%}% Caps"
+  format gui slot 14 of player with red stained glass pane named "&3Staff Disrespecting" with lore "&7(%{warn.%arg-1's uuid%.Staff Disrespecting} ? 0%&7/3)" to run:
+   make player execute "unwarn %{warn.%player%}% Staff Disrespecting"
+  format gui slot 16 of player with red stained glass pane named "&3Swearing" with lore "&7(%{warn.%arg-1's uuid%.Swearing} ? 0%&7/3)" to run:
+   make player execute "unwarn %{warn.%player%}% Swearing"
+
+
+#MUTE
+command /mute [<offlineplayer>] [<text>] [<timespan>]:
+ permission: {@mutePermission}
+ permission message: {@permissionMessage}
+ trigger:
+  if arg-1 is not set:
+   send "&c/mute (player) (reason) (-silent/-s) (length)"
+   send "&7Example: &c/mute M1necraft31 Spamming 7 days"
+   stop
+  if arg-1 has permission "{@mutePermission}":
+   send "&cYou can't do that to that player!"
+   stop
+  if {mute.%arg-1's uuid%} is set:
+   send "&cThat player is already muted!"
+   stop
+  if arg-2 is not set:
+   set {_r} to "N/A"
+  else:
+   set {_r} to arg-2
+   
+  if {_r} contains "-s" or "-silent":
+   replace all " -s" or " -silent" with "" in {_r}
+   set {_silent} to true
+
+  if player is not set:
+   set {_p} to "CONSOLE"
+  else:
+   set {_p} to player
+
+  if arg-3 is not set:
+   set {_l} to "FOREVER"
+  else:
+   set {_l} to capitalized "%arg-3%"
+    
+  set {mute.%arg-1's uuid%} to now
+  set {mute.length.%arg-1's uuid%} to {_l} parsed as timespan
+  set {mute.reason.%arg-1's uuid%} to {_r}
+  add "&3%{_p}% &7muted &3%arg-1% &7for &c%{_r}% &7[%{_l}%]" to {history.%arg-1's uuid%::*}
+  if {_silent} is set:
+   loop all players:
+    loop-player has permission "{@mutePermission}"
+    send "&8&o(SILENT) &3%{_p}% &7muted &3%arg-1% &7for &c%{_r}% &7[%{_l}%&7]" to loop-player
+   stop
+  send "&3%{_p}% &7muted &3%arg-1% &7for &c%{_r}% &7[%{_l}%&7]" to all players
+  stop
+
+on chat:
+ {mute.%player's uuid%} is set
+ if difference between now and {mute.%player's uuid%} > {mute.length.%player's uuid%}:
+  clear {mute.%player's uuid%}
+  clear {mute.length.%player's uuid%}
+  clear {mute.reason.%player's uuid%}
+ else:
+  cancel event
+  set {_l} to difference between {mute.length.%player's uuid%} and {mute.%player's uuid%}
+  set {_l} to difference between now and {_l}
+  send "&7You're muted for &c%{mute.reason.%player's uuid%}% &7[%{_l}%&7]" to player
+  send "&7You can appeal here on /discord" 
+ 
+
+#UNMUTE
+command /unmute [<offlineplayer>] [<text>]:
+ permission: {@mutePermission}
+ permission message: {@permissionMessage}
+ trigger:
+  if arg-1 is not set:
+   send "&c/unmute (player) (-silent/-s)"
+   send "&7Example: &c/unmute M1necraft31"
+   stop
+  if arg-1 has permission "{@mutePermission}":
+   send "&cYou can't do that to that player!"
+   stop
+  if {mute.%arg-1's uuid%} is not set:
+   send "&cThat player is not muted!"
+   stop
+
+  if player is not set:
+   set {_p} to "CONSOLE"
+  else:
+   set {_p} to player
+
+  clear {mute.%arg-1's uuid%}
+  clear {mute.length.%arg-1's uuid%}
+  clear {mute.reason.%arg-1's uuid%}
+  add "&3%{_p}% &7unmuted &3%arg-1%" to {history.%arg-1's uuid%::*}
+  if arg-2 contains "-s" or "-silent":
+   loop all players:
+    loop-player has permission "{@mutePermission}"
+    send "&8&o(SILENT) &3%{_p}% &7unmuted &3%arg-1%" to loop-player
+   stop
+  send "&3%{_p}% &7unmuted &3%arg-1%" to all players
+  stop
+
+#HISTORY
+command /history [<offlineplayer>]:
+ permission: {@historyPermission}
+ permission message: {@permissionMessage}
+ trigger:
+  if arg-1 is not set:
+   send "&c/history (player)"
+   stop
+  if {history.%arg-1's uuid%::*} is not set:
+   send "&3%arg-1% &7doesn't have any history!"
+   stop
+  send "&7Retrieving &3%arg-1%&7's history..."
+  loop {history.%arg-1's uuid%::*}:
+   send "&7-> %loop-value%"
+
+
+command /wipehistory [<offlineplayer>]:
+ permission: *
+ permission message: {@permissionMessage}
+ aliases: clearhistory, erasehistory, chistory
+ trigger:
+  if arg-1 is not set:
+   send "&c/wipehistory (player)"
+   stop
+  if {history.%arg-1's uuid%::*} is not set:
+   send "&3%arg-1% &7doesn't have any history!"
+   stop
+  clear {history.%arg-1's uuid%::*}
+  send "&7Cleared &3%arg-1%&7's history!"
+  stop
+
+#Ban Evading
+on connect:
+ loop all offlineplayers:
+  loop-value is not player
+  {ip.%loop-value's uuid%} is player's ip
+  loop-value is banned
+  add loop-value to {_alts::*}
+ if {_alts::*} is set:
+  kick player due to "&c&l&oBan Evading isn't allowed!"
+  execute console command "ban %player% Ban Evasion (%{_alts::*}%) -s"
+  loop all players:
+   loop-player has permission "tempban.use"
+   send "&7" to loop-player
+   send "&c&lBAN EVASION ALERT!" to loop-player
+   send "&3%player% &7is an alt account! The Main is banned" to loop-player
+   send "&7List of alt(s)" to loop-player
+   send "&c&o%{_alts::*}%" to loop-players
+   send "&7The alt account has been banned!" to loop-player
+   send "&7" to loop-player
+ set {ip.%player's uuid%} to player's ip
